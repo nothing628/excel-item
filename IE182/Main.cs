@@ -170,20 +170,25 @@ namespace IE182
         private void buttonStoreToDB_Click(object sender, EventArgs e)
         {
             storeToDB();
+            ProcessDB();
             buttonProcess.Enabled = true;
         }
 
         private void buttonProcess_Click(object sender, EventArgs e)
+        {
+            ProcessDB();
+        }
+
+        private void ProcessDB()
         {
             //Check file Database
             if (!File.Exists("IE182.db"))
                 return;
 
             //Open Database
-            using (var db = new LiteDatabase(@"IE182.db"))
-            using (var workbook = ReoGridControl.CreateMemoryWorkbook())
+            using (var db = new LiteDatabase("IE182.db"))
             {
-                var workshit = workbook.Worksheets[0];
+                var workshit = gridMain.CreateWorksheet("Final");
                 //Get Collections
                 var collect = db.GetCollection<Item>("items");
                 var items = collect.FindAll();
@@ -207,15 +212,112 @@ namespace IE182
                                      b.Key.TransDat,
                                      POs = b.ToList()
                                  }).ToList();
-                workshit.AppendRows(2000);
-                workshit["A290"] = "A";
 
-                var cell = workshit["A290"];
+                var row_pos = 1;
+                var col_pos = 22; // Column 'W'
+                var row_item = 14;
                 foreach (var item in grp_items)
                 {
-                    // Group
+                    // Group print
+                    AutoAppend(workshit, row_pos + 12, col_pos + 15);
+
+                    workshit[row_pos + 0, col_pos] = "料號";
+                    workshit[row_pos + 1, col_pos] = "料名";
+                    workshit[row_pos + 2, col_pos] = "規格";
+                    workshit[row_pos + 3, col_pos] = "單位";
+                    workshit[row_pos + 4, col_pos] = "供應商";
+                    workshit[row_pos + 5, col_pos] = "MOQ";
+                    workshit[row_pos + 6, col_pos] = "交期天數";
+                    workshit[row_pos + 7, col_pos] = "運輸天數";
+                    workshit[row_pos + 8, col_pos] = "提前加工天數";
+                    workshit[row_pos + 9, col_pos] = "安心庫存天數";
+                    workshit[row_pos + 10, col_pos] = "下單天數";
+
+                    workshit[row_pos + 0, col_pos + 1] = item.MatlNo;
+                    workshit[row_pos + 1, col_pos + 1] = item.MatlNa;
+                    workshit[row_pos + 3, col_pos + 1] = item.Unit;
+                    workshit[row_pos + 4, col_pos + 1] = item.Supplier;
+                    workshit[row_pos + 6, col_pos + 1] = item.MatlLT;
+                    workshit[row_pos + 7, col_pos + 1] = item.TransDat;
+
+                    workshit[row_pos + 12, col_pos + 0] = "單位用量";
+                    workshit[row_pos + 12, col_pos + 1] = "損耗率";
+                    workshit[row_pos + 12, col_pos + 2] = "需求量";
+                    workshit[row_pos + 12, col_pos + 3] = "已採購數量";
+                    workshit[row_pos + 12, col_pos + 4] = "採購單號";
+                    workshit[row_pos + 12, col_pos + 5] = "採購日期";
+                    workshit[row_pos + 12, col_pos + 6] = "已發出數量";
+                    workshit[row_pos + 12, col_pos + 7] = "領料單號";
+                    workshit[row_pos + 12, col_pos + 8] = "領料日期";
+                    workshit[row_pos + 12, col_pos + 9] = "採購數量(未交量)";
+                    workshit[row_pos + 12, col_pos + 10] = "訂單號碼(採購單號)";
+                    workshit[row_pos + 12, col_pos + 11] = "入庫日期";
+                    workshit[row_pos + 12, col_pos + 12] = "數量";
+                    workshit[row_pos + 12, col_pos + 13] = "單號";
+                    workshit[row_pos + 12, col_pos + 14] = "出庫日期";
+                    workshit[row_pos + 12, col_pos + 15] = "期末庫存";
+
+                    foreach (var po in item.POs)
+                    {
+                        // Write PO
+                        workshit[row_item, 0] = po.A;
+                        workshit[row_item, 1] = "'" + po.B;
+                        workshit[row_item, 2] = po.C;
+                        workshit[row_item, 3] = "'" + po.D;
+                        workshit[row_item, 4] = po.E;
+                        workshit[row_item, 5] = po.F;
+                        workshit[row_item, 6] = po.G;
+                        workshit[row_item, 7] = po.H;
+                        workshit[row_item, 8] = po.I;
+                        workshit[row_item, 9] = po.J;
+                        workshit[row_item, 10] = po.K;
+                        workshit[row_item, 11] = "'" + po.L;
+                        workshit[row_item, 12] = po.M;
+                        workshit[row_item, 13] = "'" + po.N;
+                        workshit[row_item, 14] = po.O;
+                        workshit[row_item, 15] = "'" + po.P;
+                        workshit[row_item, 16] = "'" + po.Q;
+                        workshit[row_item, 17] = "'" + po.R;
+                        workshit[row_item, 18] = po.S;
+                        workshit[row_item, 19] = po.T;
+                        workshit[row_item, 20] = po.U;
+                        workshit[row_item, 21] = po.V;
+
+                        workshit[row_item, col_pos + 0] = po.AI;
+                        workshit[row_item, col_pos + 1] = po.AJ;
+                        workshit[row_item, col_pos + 2] = po.AK;
+                        workshit[row_item, col_pos + 3] = po.AQ;
+                        workshit[row_item, col_pos + 4] = po.AR;
+                        workshit[row_item, col_pos + 5] = po.AS;
+                        workshit[row_item, col_pos + 6] = po.AT;
+                        workshit[row_item, col_pos + 7] = po.AU;
+                        workshit[row_item, col_pos + 8] = po.AV;
+                        workshit[row_item, col_pos + 9] = po.AW;
+                        workshit[row_item, col_pos + 10] = po.AX;
+                        workshit[row_item, col_pos + 11] = po.AY;
+                        workshit[row_item, col_pos + 12] = po.AZ;
+                        workshit[row_item, col_pos + 13] = po.BA;
+                        workshit[row_item, col_pos + 14] = po.BB;
+                        workshit[row_item, col_pos + 15] = po.BC;
+
+                        row_item++;
+                    }
+
+                    col_pos += 16;
                 }
+
+                gridMain.AddWorksheet(workshit);
+                gridMain.CurrentWorksheet = workshit;
             }
+        }
+
+        private void AutoAppend(Worksheet sheet, int row, int col)
+        {
+            if (sheet.RowCount < row)
+                sheet.AppendRows(row - sheet.RowCount + 1);
+
+            if (sheet.ColumnCount < col)
+                sheet.AppendCols(col - sheet.ColumnCount + 1);
         }
     }
 }
