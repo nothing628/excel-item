@@ -45,11 +45,11 @@ namespace IE182
             var maxRow = currentSheet.RowCount;
             var maxCol = currentSheet.ColumnCount;
 
-            if (File.Exists(@"IE182.db"))
-                File.Delete(@"IE182.db");
+            if (File.Exists("IE182.db"))
+                File.Delete("IE182.db");
 
             // Open database (or create if not exits)
-            using (var db = new LiteDatabase(@"IE182.db"))
+            using (var db = new LiteDatabase("IE182.db"))
             {
                 // Get customer collection
                 var items = db.GetCollection<Item>("items");
@@ -60,6 +60,8 @@ namespace IE182
 
                     if (firstCell == null || firstCell.ToString().Length == 0) //This empty data, ignore it
                         break;
+
+                    Invoke(new UpdateStatus(UpdateStat), $"Received Item : {i}", 0);
 
                     var item = new Item
                     {
@@ -171,6 +173,8 @@ namespace IE182
 
         private void buttonProcess_Click(object sender, EventArgs e)
         {
+            Invoke(new UpdateStatus(UpdateStat), "", 0);
+
             storeToDB();
             if (ProcessDB())
                 btnSave.Enabled = true;
@@ -220,7 +224,8 @@ namespace IE182
                                         PO = b.Key,
                                         POs = b.ToList()
                                     }).ToList();
-                    
+
+                    Invoke(new UpdateStatus(UpdateStat), $"Creating Header ({grp_material.Count})", 0);
                     GenerateHeader(workshit, grp_material);
                     GenerateOutput(workshit, grp_item, grp_material);
 
@@ -372,6 +377,7 @@ namespace IE182
 
         private void GenerateOutput(Worksheet sheet, List<POClass> list_po, List<MaterialClass> list_matl)
         {
+            var item_pos = 1;
             var row_item = 14;
 
             foreach (var item in list_po)
@@ -430,8 +436,21 @@ namespace IE182
                     sheet.SetRangeBorders(row_item, col_x, 1, 16, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
                 }
 
+                var progress = Convert.ToSingle(item_pos) / Convert.ToSingle(list_po.Count);
+
+                Invoke(new UpdateStatus(UpdateStat), $"Updating row {item_pos} / { list_po.Count }", progress);
+
                 row_item++;
+                item_pos++;
             }
+        }
+
+        private delegate void UpdateStatus(string status, float progress);
+
+        private void UpdateStat(string status, float progress)
+        {
+            toolStripProgressBar1.Value = Convert.ToInt32(progress * 100);
+            toolStripStatusLabel1.Text = "Status : " + status;
         }
 
         private void AutoAppend(Worksheet sheet, int row, int col)
