@@ -35,7 +35,7 @@ namespace IE182
                 {
                     textBoxFileName.Text = openFileDialog.FileName;
                     loadWorkSheet(openFileDialog.FileName);
-                    buttonStoreToDB.Enabled = true;
+                    buttonProcess.Enabled = true;
                 }
             }
         }
@@ -167,15 +167,9 @@ namespace IE182
             }        
         }
 
-        private void buttonStoreToDB_Click(object sender, EventArgs e)
-        {
-            storeToDB();
-            ProcessDB();
-            buttonProcess.Enabled = true;
-        }
-
         private void buttonProcess_Click(object sender, EventArgs e)
         {
+            storeToDB();
             ProcessDB();
         }
 
@@ -211,108 +205,13 @@ namespace IE182
                                     PO = b.Key,
                                     POs = b.ToList()
                                 }).ToList();
+
                 
-                var row_pos = 1;
-                var col_pos = 22; // Start at Column 'W'
-                var row_item = 14;
-                foreach (var item in grp_material)
-                {
-                    // Group print
-                    AutoAppend(workshit, row_pos + 12, col_pos + 15);
+                
 
-                    workshit[row_pos + 0, col_pos] = "料號";
-                    workshit[row_pos + 1, col_pos] = "料名";
-                    workshit[row_pos + 2, col_pos] = "規格";
-                    workshit[row_pos + 3, col_pos] = "單位";
-                    workshit[row_pos + 4, col_pos] = "供應商";
-                    workshit[row_pos + 5, col_pos] = "MOQ";
-                    workshit[row_pos + 6, col_pos] = "交期天數";
-                    workshit[row_pos + 7, col_pos] = "運輸天數";
-                    workshit[row_pos + 8, col_pos] = "提前加工天數";
-                    workshit[row_pos + 9, col_pos] = "安心庫存天數";
-                    workshit[row_pos + 10, col_pos] = "下單天數";
-
-                    workshit[row_pos + 0, col_pos + 1] = item.MatlNo;
-                    workshit[row_pos + 1, col_pos + 1] = item.MatlNa;
-                    workshit[row_pos + 3, col_pos + 1] = item.Unit;
-                    workshit[row_pos + 4, col_pos + 1] = item.SupplierCod + " " + item.SupplierNa;
-                    workshit[row_pos + 6, col_pos + 1] = item.MatlLT;
-                    workshit[row_pos + 7, col_pos + 1] = item.TransDat;
-
-                    workshit[row_pos + 12, col_pos + 0] = "單位用量";
-                    workshit[row_pos + 12, col_pos + 1] = "損耗率";
-                    workshit[row_pos + 12, col_pos + 2] = "需求量";
-                    workshit[row_pos + 12, col_pos + 3] = "已採購數量";
-                    workshit[row_pos + 12, col_pos + 4] = "採購單號";
-                    workshit[row_pos + 12, col_pos + 5] = "採購日期";
-                    workshit[row_pos + 12, col_pos + 6] = "已發出數量";
-                    workshit[row_pos + 12, col_pos + 7] = "領料單號";
-                    workshit[row_pos + 12, col_pos + 8] = "領料日期";
-                    workshit[row_pos + 12, col_pos + 9] = "採購數量(未交量)";
-                    workshit[row_pos + 12, col_pos + 10] = "訂單號碼(採購單號)";
-                    workshit[row_pos + 12, col_pos + 11] = "入庫日期";
-                    workshit[row_pos + 12, col_pos + 12] = "數量";
-                    workshit[row_pos + 12, col_pos + 13] = "單號";
-                    workshit[row_pos + 12, col_pos + 14] = "出庫日期";
-                    workshit[row_pos + 12, col_pos + 15] = "期末庫存";
-                    
-                    col_pos += 16;
-                }
-
-                foreach (var item in grp_item)
-                {
-                    var po = item.POs.First();
-
-                    workshit[row_item, 0] = po.A;
-                    workshit[row_item, 1] = "'" + po.B;
-                    workshit[row_item, 2] = po.C;
-                    workshit[row_item, 3] = "'" + po.D;
-                    workshit[row_item, 4] = po.E;
-                    workshit[row_item, 5] = po.F;
-                    workshit[row_item, 6] = po.G;
-                    workshit[row_item, 7] = po.H;
-                    workshit[row_item, 8] = po.I;
-                    workshit[row_item, 9] = po.J;
-                    workshit[row_item, 10] = po.K;
-                    workshit[row_item, 11] = "'" + po.L;
-                    workshit[row_item, 12] = po.M;
-                    workshit[row_item, 13] = "'" + po.N;
-                    workshit[row_item, 14] = po.O;
-                    workshit[row_item, 15] = "'" + po.P;
-                    workshit[row_item, 16] = "'" + po.Q;
-                    workshit[row_item, 17] = "'" + po.R;
-                    workshit[row_item, 18] = po.S;
-                    workshit[row_item, 19] = po.T;
-                    workshit[row_item, 20] = po.U;
-                    workshit[row_item, 21] = po.V;
-
-                    foreach (var detPo in item.POs)
-                    {
-                        var col_x = GetColumnPosition(grp_material, detPo.AF, detPo.AL, detPo.AH, detPo.AO, detPo.AP);// GetColumn position by material and supplier;
-
-                        if (col_x == -1) throw new Exception("Material Not Found!");
-
-                        workshit[row_item, col_x + 0] = detPo.AI;
-                        workshit[row_item, col_x + 1] = detPo.AJ;
-                        workshit[row_item, col_x + 2] = detPo.AK;
-                        workshit[row_item, col_x + 3] = detPo.AQ;
-                        workshit[row_item, col_x + 4] = detPo.AR;
-                        workshit[row_item, col_x + 5] = detPo.AS;
-                        workshit[row_item, col_x + 6] = detPo.AT;
-                        workshit[row_item, col_x + 7] = detPo.AU;
-                        workshit[row_item, col_x + 8] = detPo.AV;
-                        workshit[row_item, col_x + 9] = detPo.AW;
-                        workshit[row_item, col_x + 10] = detPo.AX;
-                        workshit[row_item, col_x + 11] = detPo.AY;
-                        workshit[row_item, col_x + 12] = detPo.AZ;
-                        workshit[row_item, col_x + 13] = detPo.BA;
-                        workshit[row_item, col_x + 14] = detPo.BB;
-                        workshit[row_item, col_x + 15] = detPo.BC;
-                    }
-
-                    row_item++;
-                }
-
+                GenerateHeader(workshit, grp_material);
+                GenerateOutput(workshit, grp_item, grp_material);
+                
                 gridMain.AddWorksheet(workshit);
                 gridMain.CurrentWorksheet = workshit;
             }
@@ -331,6 +230,160 @@ namespace IE182
             if (material != null)
                 return list_matl.IndexOf(material) * 16 + 22;
             return -1;
+        }
+
+        private void GenerateHeader(Worksheet sheet, List<MaterialClass> list_matl)
+        {
+            var row_pos = 1;
+            var col_pos = 22; // Start at Column 'W'
+            var side_style = new WorksheetRangeStyle()
+            {
+                Flag = PlainStyleFlag.BackColor,
+                BackColor = Color.Aqua,
+            };
+
+            var header_style = new WorksheetRangeStyle()
+            {
+                Flag = PlainStyleFlag.BackColor,
+                BackColor = Color.Yellow,
+            };
+
+            sheet[row_pos + 12, 0] = "週次 week";
+            sheet[row_pos + 12, 1] = "投產周別 production week";
+            sheet[row_pos + 12, 2] = "投產日期 production date";
+            sheet[row_pos + 12, 3] = "出貨週別 shipment week";
+            sheet[row_pos + 12, 4] = "工廠預計出貨日 Factory shipment date";
+            sheet[row_pos + 12, 5] = "每周計劃工作時數 weekly working hours";
+            sheet[row_pos + 12, 6] = "每週全廠現有生產線數(中線140)";
+            sheet[row_pos + 12, 7] = "每週全廠現有每小時產能";
+            sheet[row_pos + 12, 8] = "每週全廠產能(效率100%)";
+            sheet[row_pos + 12, 9] = "有效每週產能 (95%)";
+            sheet[row_pos + 12, 10] = "累計週次有效產能 (95%)";
+            sheet[row_pos + 12, 11] = "PO#";
+            sheet[row_pos + 12, 12] = "Model No";
+            sheet[row_pos + 12, 13] = "楦頭(Last No)";
+            sheet[row_pos + 12, 14] = "Model Name";
+            sheet[row_pos + 12, 15] = "底模(Tooling No)";
+            sheet[row_pos + 12, 16] = "刀模(Upper ID)";
+            sheet[row_pos + 12, 17] = "MI#";
+            sheet[row_pos + 12, 18] = "MI Group MI 組別";
+            sheet[row_pos + 12, 19] = "顏色(Article)";
+            sheet[row_pos + 12, 20] = "Order Qty";
+            sheet[row_pos + 12, 21] = "累計訂單數量";
+
+            sheet.SetRangeStyles(row_pos + 12, 0, 1, 22, header_style);
+            sheet.SetRangeBorders(row_pos + 12, 0, 1, 22, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+
+            foreach (var item in list_matl)
+            {
+                // Group print
+                AutoAppend(sheet, row_pos + 12, col_pos + 15);
+
+                sheet[row_pos + 0, col_pos] = "料號";
+                sheet[row_pos + 1, col_pos] = "料名";
+                sheet[row_pos + 2, col_pos] = "規格";
+                sheet[row_pos + 3, col_pos] = "單位";
+                sheet[row_pos + 4, col_pos] = "供應商";
+                sheet[row_pos + 5, col_pos] = "MOQ";
+                sheet[row_pos + 6, col_pos] = "交期天數";
+                sheet[row_pos + 7, col_pos] = "運輸天數";
+                sheet[row_pos + 8, col_pos] = "提前加工天數";
+                sheet[row_pos + 9, col_pos] = "安心庫存天數";
+                sheet[row_pos + 10, col_pos] = "下單天數";
+
+                sheet[row_pos + 0, col_pos + 1] = item.MatlNo;
+                sheet[row_pos + 1, col_pos + 1] = item.MatlNa;
+                sheet[row_pos + 3, col_pos + 1] = item.Unit;
+                sheet[row_pos + 4, col_pos + 1] = item.SupplierCod + " " + item.SupplierNa;
+                sheet[row_pos + 6, col_pos + 1] = item.MatlLT;
+                sheet[row_pos + 7, col_pos + 1] = item.TransDat;
+
+                sheet[row_pos + 12, col_pos + 0] = "單位用量";
+                sheet[row_pos + 12, col_pos + 1] = "損耗率";
+                sheet[row_pos + 12, col_pos + 2] = "需求量";
+                sheet[row_pos + 12, col_pos + 3] = "已採購數量";
+                sheet[row_pos + 12, col_pos + 4] = "採購單號";
+                sheet[row_pos + 12, col_pos + 5] = "採購日期";
+                sheet[row_pos + 12, col_pos + 6] = "已發出數量";
+                sheet[row_pos + 12, col_pos + 7] = "領料單號";
+                sheet[row_pos + 12, col_pos + 8] = "領料日期";
+                sheet[row_pos + 12, col_pos + 9] = "採購數量(未交量)";
+                sheet[row_pos + 12, col_pos + 10] = "訂單號碼(採購單號)";
+                sheet[row_pos + 12, col_pos + 11] = "入庫日期";
+                sheet[row_pos + 12, col_pos + 12] = "數量";
+                sheet[row_pos + 12, col_pos + 13] = "單號";
+                sheet[row_pos + 12, col_pos + 14] = "出庫日期";
+                sheet[row_pos + 12, col_pos + 15] = "期末庫存";
+
+                sheet.SetRangeBorders(row_pos, col_pos, 11, 1, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+                sheet.SetRangeBorders(row_pos + 12, col_pos, 1, 16, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+                sheet.SetRangeStyles(row_pos, col_pos, 11, 1, side_style);
+                sheet.SetRangeStyles(row_pos + 12, col_pos, 1, 16, header_style);
+
+                col_pos += 16;
+            }
+        }
+
+        private void GenerateOutput(Worksheet sheet, List<POClass> list_po, List<MaterialClass> list_matl)
+        {
+            var row_item = 14;
+
+            foreach (var item in list_po)
+            {
+                var po = item.POs.First();
+
+                sheet[row_item, 0] = po.A;
+                sheet[row_item, 1] = "'" + po.B;
+                sheet[row_item, 2] = po.C;
+                sheet[row_item, 3] = "'" + po.D;
+                sheet[row_item, 4] = po.E;
+                sheet[row_item, 5] = po.F;
+                sheet[row_item, 6] = po.G;
+                sheet[row_item, 7] = po.H;
+                sheet[row_item, 8] = po.I;
+                sheet[row_item, 9] = po.J;
+                sheet[row_item, 10] = po.K;
+                sheet[row_item, 11] = "'" + po.L;
+                sheet[row_item, 12] = po.M;
+                sheet[row_item, 13] = "'" + po.N;
+                sheet[row_item, 14] = po.O;
+                sheet[row_item, 15] = "'" + po.P;
+                sheet[row_item, 16] = "'" + po.Q;
+                sheet[row_item, 17] = "'" + po.R;
+                sheet[row_item, 18] = po.S;
+                sheet[row_item, 19] = po.T;
+                sheet[row_item, 20] = po.U;
+                sheet[row_item, 21] = po.V;
+                sheet.SetRangeBorders(row_item, 0, 1, 22, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+
+                foreach (var detPo in item.POs)
+                {
+                    var col_x = GetColumnPosition(list_matl, detPo.AF, detPo.AL, detPo.AH, detPo.AO, detPo.AP);// GetColumn position by material and supplier;
+
+                    if (col_x == -1) throw new Exception("Material Not Found!");
+
+                    sheet[row_item, col_x + 0] = detPo.AI;
+                    sheet[row_item, col_x + 1] = detPo.AJ;
+                    sheet[row_item, col_x + 2] = detPo.AK;
+                    sheet[row_item, col_x + 3] = detPo.AQ;
+                    sheet[row_item, col_x + 4] = detPo.AR;
+                    sheet[row_item, col_x + 5] = detPo.AS;
+                    sheet[row_item, col_x + 6] = detPo.AT;
+                    sheet[row_item, col_x + 7] = detPo.AU;
+                    sheet[row_item, col_x + 8] = detPo.AV;
+                    sheet[row_item, col_x + 9] = detPo.AW;
+                    sheet[row_item, col_x + 10] = detPo.AX;
+                    sheet[row_item, col_x + 11] = detPo.AY;
+                    sheet[row_item, col_x + 12] = detPo.AZ;
+                    sheet[row_item, col_x + 13] = detPo.BA;
+                    sheet[row_item, col_x + 14] = detPo.BB;
+                    sheet[row_item, col_x + 15] = detPo.BC;
+
+                    sheet.SetRangeBorders(row_item, col_x, 1, 16, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+                }
+
+                row_item++;
+            }
         }
 
         private void AutoAppend(Worksheet sheet, int row, int col)

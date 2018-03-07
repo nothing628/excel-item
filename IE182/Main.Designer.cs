@@ -32,7 +32,6 @@
             this.textBoxFileName = new System.Windows.Forms.TextBox();
             this.buttonChooseFile = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.buttonStoreToDB = new System.Windows.Forms.Button();
             this.buttonProcess = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -89,23 +88,11 @@
             this.button1.Text = "Setting";
             this.button1.UseVisualStyleBackColor = true;
             // 
-            // buttonStoreToDB
-            // 
-            this.buttonStoreToDB.Enabled = false;
-            this.buttonStoreToDB.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonStoreToDB.Location = new System.Drawing.Point(623, 12);
-            this.buttonStoreToDB.Name = "buttonStoreToDB";
-            this.buttonStoreToDB.Size = new System.Drawing.Size(123, 37);
-            this.buttonStoreToDB.TabIndex = 4;
-            this.buttonStoreToDB.Text = "Store To DB";
-            this.buttonStoreToDB.UseVisualStyleBackColor = true;
-            this.buttonStoreToDB.Click += new System.EventHandler(this.buttonStoreToDB_Click);
-            // 
             // buttonProcess
             // 
             this.buttonProcess.Enabled = false;
             this.buttonProcess.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonProcess.Location = new System.Drawing.Point(752, 12);
+            this.buttonProcess.Location = new System.Drawing.Point(609, 13);
             this.buttonProcess.Name = "buttonProcess";
             this.buttonProcess.Size = new System.Drawing.Size(89, 37);
             this.buttonProcess.TabIndex = 5;
@@ -119,7 +106,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(984, 461);
             this.Controls.Add(this.buttonProcess);
-            this.Controls.Add(this.buttonStoreToDB);
             this.Controls.Add(this.buttonChooseFile);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBoxFileName);
@@ -139,7 +125,6 @@
         private System.Windows.Forms.TextBox textBoxFileName;
         private System.Windows.Forms.Button buttonChooseFile;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button buttonStoreToDB;
         private System.Windows.Forms.Button buttonProcess;
     }
 }
