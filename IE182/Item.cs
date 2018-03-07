@@ -2,7 +2,7 @@
 
 namespace IE182
 {
-    class Item
+    public class Item
     {
         public Guid Id { get; set; }
         public string A { get; set; }

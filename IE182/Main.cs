@@ -192,31 +192,30 @@ namespace IE182
                 //Get Collections
                 var collect = db.GetCollection<Item>("items");
                 var items = collect.FindAll();
-                var grp_items = (from a in items
-                                 group a by new
+                var grp_material = (from a in items
+                                 select new MaterialClass
                                  {
                                      MatlNo = a.AF,
                                      MatlNa = a.AG,
                                      Unit = a.AH,
-                                     Supplier = a.AL + a.AM,
+                                     SupplierCod = a.AL,
+                                     SupplierNa = a.AM,
                                      MatlLT = a.AO,
                                      TransDat = a.AP,
-                                 } into b
-                                 select new
-                                 {
-                                     b.Key.MatlNo,
-                                     b.Key.MatlNa,
-                                     b.Key.Unit,
-                                     b.Key.Supplier,
-                                     b.Key.MatlLT,
-                                     b.Key.TransDat,
-                                     POs = b.ToList()
-                                 }).ToList();
+                                 }).Distinct().ToList();
 
+                var grp_item = (from a in items
+                                group a by a.L into b
+                                select new POClass
+                                {
+                                    PO = b.Key,
+                                    POs = b.ToList()
+                                }).ToList();
+                
                 var row_pos = 1;
-                var col_pos = 22; // Column 'W'
+                var col_pos = 22; // Start at Column 'W'
                 var row_item = 14;
-                foreach (var item in grp_items)
+                foreach (var item in grp_material)
                 {
                     // Group print
                     AutoAppend(workshit, row_pos + 12, col_pos + 15);
@@ -236,7 +235,7 @@ namespace IE182
                     workshit[row_pos + 0, col_pos + 1] = item.MatlNo;
                     workshit[row_pos + 1, col_pos + 1] = item.MatlNa;
                     workshit[row_pos + 3, col_pos + 1] = item.Unit;
-                    workshit[row_pos + 4, col_pos + 1] = item.Supplier;
+                    workshit[row_pos + 4, col_pos + 1] = item.SupplierCod + " " + item.SupplierNa;
                     workshit[row_pos + 6, col_pos + 1] = item.MatlLT;
                     workshit[row_pos + 7, col_pos + 1] = item.TransDat;
 
@@ -256,59 +255,82 @@ namespace IE182
                     workshit[row_pos + 12, col_pos + 13] = "單號";
                     workshit[row_pos + 12, col_pos + 14] = "出庫日期";
                     workshit[row_pos + 12, col_pos + 15] = "期末庫存";
+                    
+                    col_pos += 16;
+                }
 
-                    foreach (var po in item.POs)
+                foreach (var item in grp_item)
+                {
+                    var po = item.POs.First();
+
+                    workshit[row_item, 0] = po.A;
+                    workshit[row_item, 1] = "'" + po.B;
+                    workshit[row_item, 2] = po.C;
+                    workshit[row_item, 3] = "'" + po.D;
+                    workshit[row_item, 4] = po.E;
+                    workshit[row_item, 5] = po.F;
+                    workshit[row_item, 6] = po.G;
+                    workshit[row_item, 7] = po.H;
+                    workshit[row_item, 8] = po.I;
+                    workshit[row_item, 9] = po.J;
+                    workshit[row_item, 10] = po.K;
+                    workshit[row_item, 11] = "'" + po.L;
+                    workshit[row_item, 12] = po.M;
+                    workshit[row_item, 13] = "'" + po.N;
+                    workshit[row_item, 14] = po.O;
+                    workshit[row_item, 15] = "'" + po.P;
+                    workshit[row_item, 16] = "'" + po.Q;
+                    workshit[row_item, 17] = "'" + po.R;
+                    workshit[row_item, 18] = po.S;
+                    workshit[row_item, 19] = po.T;
+                    workshit[row_item, 20] = po.U;
+                    workshit[row_item, 21] = po.V;
+
+                    foreach (var detPo in item.POs)
                     {
-                        // Write PO
-                        workshit[row_item, 0] = po.A;
-                        workshit[row_item, 1] = "'" + po.B;
-                        workshit[row_item, 2] = po.C;
-                        workshit[row_item, 3] = "'" + po.D;
-                        workshit[row_item, 4] = po.E;
-                        workshit[row_item, 5] = po.F;
-                        workshit[row_item, 6] = po.G;
-                        workshit[row_item, 7] = po.H;
-                        workshit[row_item, 8] = po.I;
-                        workshit[row_item, 9] = po.J;
-                        workshit[row_item, 10] = po.K;
-                        workshit[row_item, 11] = "'" + po.L;
-                        workshit[row_item, 12] = po.M;
-                        workshit[row_item, 13] = "'" + po.N;
-                        workshit[row_item, 14] = po.O;
-                        workshit[row_item, 15] = "'" + po.P;
-                        workshit[row_item, 16] = "'" + po.Q;
-                        workshit[row_item, 17] = "'" + po.R;
-                        workshit[row_item, 18] = po.S;
-                        workshit[row_item, 19] = po.T;
-                        workshit[row_item, 20] = po.U;
-                        workshit[row_item, 21] = po.V;
+                        var col_x = GetColumnPosition(grp_material, detPo.AF, detPo.AL, detPo.AH, detPo.AO, detPo.AP);// GetColumn position by material and supplier;
 
-                        workshit[row_item, col_pos + 0] = po.AI;
-                        workshit[row_item, col_pos + 1] = po.AJ;
-                        workshit[row_item, col_pos + 2] = po.AK;
-                        workshit[row_item, col_pos + 3] = po.AQ;
-                        workshit[row_item, col_pos + 4] = po.AR;
-                        workshit[row_item, col_pos + 5] = po.AS;
-                        workshit[row_item, col_pos + 6] = po.AT;
-                        workshit[row_item, col_pos + 7] = po.AU;
-                        workshit[row_item, col_pos + 8] = po.AV;
-                        workshit[row_item, col_pos + 9] = po.AW;
-                        workshit[row_item, col_pos + 10] = po.AX;
-                        workshit[row_item, col_pos + 11] = po.AY;
-                        workshit[row_item, col_pos + 12] = po.AZ;
-                        workshit[row_item, col_pos + 13] = po.BA;
-                        workshit[row_item, col_pos + 14] = po.BB;
-                        workshit[row_item, col_pos + 15] = po.BC;
+                        if (col_x == -1) throw new Exception("Material Not Found!");
 
-                        row_item++;
+                        workshit[row_item, col_x + 0] = detPo.AI;
+                        workshit[row_item, col_x + 1] = detPo.AJ;
+                        workshit[row_item, col_x + 2] = detPo.AK;
+                        workshit[row_item, col_x + 3] = detPo.AQ;
+                        workshit[row_item, col_x + 4] = detPo.AR;
+                        workshit[row_item, col_x + 5] = detPo.AS;
+                        workshit[row_item, col_x + 6] = detPo.AT;
+                        workshit[row_item, col_x + 7] = detPo.AU;
+                        workshit[row_item, col_x + 8] = detPo.AV;
+                        workshit[row_item, col_x + 9] = detPo.AW;
+                        workshit[row_item, col_x + 10] = detPo.AX;
+                        workshit[row_item, col_x + 11] = detPo.AY;
+                        workshit[row_item, col_x + 12] = detPo.AZ;
+                        workshit[row_item, col_x + 13] = detPo.BA;
+                        workshit[row_item, col_x + 14] = detPo.BB;
+                        workshit[row_item, col_x + 15] = detPo.BC;
                     }
 
-                    col_pos += 16;
+                    row_item++;
                 }
 
                 gridMain.AddWorksheet(workshit);
                 gridMain.CurrentWorksheet = workshit;
             }
+        }
+
+        private int GetColumnPosition(List<MaterialClass> list_matl, string MatNo, string SupplierCod, string Unit, string MatLT, string TransDat)
+        {
+            var material = (from a in list_matl
+                            where a.MatlNo == MatNo
+                            where a.SupplierCod == SupplierCod
+                            where a.Unit == Unit
+                            where a.MatlLT == MatLT
+                            where a.TransDat == TransDat
+                            select a).FirstOrDefault();
+
+            if (material != null)
+                return list_matl.IndexOf(material) * 16 + 22;
+            return -1;
         }
 
         private void AutoAppend(Worksheet sheet, int row, int col)
@@ -319,5 +341,23 @@ namespace IE182
             if (sheet.ColumnCount < col)
                 sheet.AppendCols(col - sheet.ColumnCount + 1);
         }
+    }
+
+    public class MaterialClass
+    {
+        public string MatlNo { get; set; }
+        public string MatlNa { get; set; }
+        public string Unit { get; set; }
+        public string SupplierCod { get; set; }
+        public string SupplierNa { get; set; }
+        public string MatlLT { get; set; }
+        public string TransDat { get; set; }
+    }
+
+    public class POClass
+    {
+        public string PO { get; set; }
+
+        public List<Item> POs { get; set; }
     }
 }
