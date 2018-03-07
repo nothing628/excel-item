@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using unvell.ReoGrid;
 
 namespace IE182
 {
@@ -55,6 +56,11 @@ namespace IE182
                 
                 for (int i = 5; i <= maxRow; i++)
                 {
+                    var firstCell = currentSheet[$"L{i}"];
+
+                    if (firstCell == null || firstCell.ToString().Length == 0) //This empty data, ignore it
+                        break;
+
                     var item = new Item
                     {
                         A = currentSheet[$"A{i}"] != null ? currentSheet[$"A{i}"].ToString() : "",
@@ -169,7 +175,47 @@ namespace IE182
 
         private void buttonProcess_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("This function not yet finish");
+            //Check file Database
+            if (!File.Exists("IE182.db"))
+                return;
+
+            //Open Database
+            using (var db = new LiteDatabase(@"IE182.db"))
+            using (var workbook = ReoGridControl.CreateMemoryWorkbook())
+            {
+                var workshit = workbook.Worksheets[0];
+                //Get Collections
+                var collect = db.GetCollection<Item>("items");
+                var items = collect.FindAll();
+                var grp_items = (from a in items
+                                 group a by new
+                                 {
+                                     MatlNo = a.AF,
+                                     MatlNa = a.AG,
+                                     Unit = a.AH,
+                                     Supplier = a.AL + a.AM,
+                                     MatlLT = a.AO,
+                                     TransDat = a.AP,
+                                 } into b
+                                 select new
+                                 {
+                                     b.Key.MatlNo,
+                                     b.Key.MatlNa,
+                                     b.Key.Unit,
+                                     b.Key.Supplier,
+                                     b.Key.MatlLT,
+                                     b.Key.TransDat,
+                                     POs = b.ToList()
+                                 }).ToList();
+                workshit.AppendRows(2000);
+                workshit["A290"] = "A";
+
+                var cell = workshit["A290"];
+                foreach (var item in grp_items)
+                {
+                    // Group
+                }
+            }
         }
     }
 }
