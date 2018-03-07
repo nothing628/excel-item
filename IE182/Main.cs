@@ -126,13 +126,10 @@ namespace IE182
                     items.Insert(item);
                 }
                 
-                // Index document using document Name property
-                items.EnsureIndex(x => x.L);
-                items.EnsureIndex(x => x.M);
-                items.EnsureIndex(x => x.AF);
-
             }
-            
+
+            Invoke(new ClearTable(ResetGrid));
+
             GC.Collect();
         }
 
@@ -438,6 +435,7 @@ namespace IE182
 
         private delegate void UpdateStatus(string status, float progress);
         private delegate void UpdateTables(IWorkbook workbook, bool IsSuccess);
+        private delegate void ClearTable();
 
         private void UpdateWorkbook(IWorkbook workbook, bool IsSuccess)
         {
@@ -446,8 +444,7 @@ namespace IE182
                 var wrkSht = workbook.Worksheets[0];
 
                 workbook.RemoveWorksheet(wrkSht);
-
-                gridMain.Reset();
+                
                 gridMain.AddWorksheet(wrkSht);
                 gridMain.CurrentWorksheet = wrkSht;
                 gridMain.RemoveWorksheet(0);
@@ -460,6 +457,12 @@ namespace IE182
         {
             toolStripProgressBar1.Value = Convert.ToInt32(progress * 100);
             toolStripStatusLabel1.Text = "Status : " + status;
+        }
+
+        private void ResetGrid()
+        {
+            gridMain.Reset();
+            GC.Collect();
         }
 
         private void AutoAppend(Worksheet sheet, int row, int col)
