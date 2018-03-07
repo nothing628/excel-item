@@ -36,6 +36,7 @@ namespace IE182
                     textBoxFileName.Text = openFileDialog.FileName;
                     loadWorkSheet(openFileDialog.FileName);
                     btnProcess.Enabled = true;
+                    btnSave.Enabled = false;
                 }
             }
         }
@@ -61,7 +62,7 @@ namespace IE182
                     if (firstCell == null || firstCell.ToString().Length == 0) //This empty data, ignore it
                         break;
 
-                    Invoke(new UpdateStatus(UpdateStat), $"Received Item : {i}", 0);
+                    Invoke(new UpdateStatus(UpdateStat), $"Received Item : {i - 4}", 0);
 
                     var item = new Item
                     {
@@ -131,9 +132,7 @@ namespace IE182
                 items.EnsureIndex(x => x.AF);
 
             }
-
-            gridMain.Reset();
-
+            
             GC.Collect();
         }
 
@@ -162,38 +161,30 @@ namespace IE182
             GC.Collect();
         }
 
-        private void buttonExport_Click(object sender, EventArgs e)
-        {
-            using (var saveFileDialog = new SaveFileDialog())
-            {
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                    gridMain.Save(saveFileDialog.FileName, unvell.ReoGrid.IO.FileFormat.Excel2007);
-            }        
-        }
-
         private void buttonProcess_Click(object sender, EventArgs e)
         {
             Invoke(new UpdateStatus(UpdateStat), "", 0);
 
-            storeToDB();
-            if (ProcessDB())
-                btnSave.Enabled = true;
+            Task.Run(() =>
+            {
+                storeToDB();
+                ProcessDB();
+            });
         }
 
-        private bool ProcessDB()
+        private void ProcessDB()
         {
-            var res = false;
-
             //Check file Database
             if (!File.Exists("IE182.db"))
-                return res;
+                return;
 
             //Open Database
             using (var db = new LiteDatabase("IE182.db"))
+            using (var workbook = ReoGridControl.CreateMemoryWorkbook())
             {
                 try
                 {
-                    var workshit = gridMain.CreateWorksheet("Final");
+                    var workshit = workbook.CreateWorksheet("Final");
                     //Get Collections
                     var collect = db.GetCollection<Item>("items");
                     var items = collect.FindAll();
@@ -229,19 +220,19 @@ namespace IE182
                     GenerateHeader(workshit, grp_material);
                     GenerateOutput(workshit, grp_item, grp_material);
 
-                    gridMain.AddWorksheet(workshit);
-                    gridMain.CurrentWorksheet = workshit;
-                    gridMain.RemoveWorksheet(0);
+                    workbook.AddWorksheet(workshit);
+                    workbook.RemoveWorksheet(0);
 
-                    res = true;
-                } catch (Exception ex)
+                    Invoke(new UpdateTables(UpdateWorkbook), workbook, true);
+                }
+                catch (Exception ex)
                 {
+                    Invoke(new UpdateTables(UpdateWorkbook), null, false);
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 
             GC.Collect();
-            return res;
         }
 
         private int GetColumnPosition(List<MaterialClass> list_matl, string MatNo, string SupplierCod, string Unit, string MatLT, string TransDat)
@@ -446,6 +437,24 @@ namespace IE182
         }
 
         private delegate void UpdateStatus(string status, float progress);
+        private delegate void UpdateTables(IWorkbook workbook, bool IsSuccess);
+
+        private void UpdateWorkbook(IWorkbook workbook, bool IsSuccess)
+        {
+            if (IsSuccess)
+            {
+                var wrkSht = workbook.Worksheets[0];
+
+                workbook.RemoveWorksheet(wrkSht);
+
+                gridMain.Reset();
+                gridMain.AddWorksheet(wrkSht);
+                gridMain.CurrentWorksheet = wrkSht;
+                gridMain.RemoveWorksheet(0);
+
+                btnSave.Enabled = true;
+            }
+        }
 
         private void UpdateStat(string status, float progress)
         {
@@ -473,7 +482,6 @@ namespace IE182
                     btnSave.Enabled = false;
                     btnProcess.Enabled = false;
                 }
-                    
             }
         }
     }
