@@ -32,7 +32,8 @@
             this.textBoxFileName = new System.Windows.Forms.TextBox();
             this.buttonChooseFile = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.buttonProcess = new System.Windows.Forms.Button();
+            this.btnProcess = new System.Windows.Forms.Button();
+            this.btnSave = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // gridMain
@@ -88,24 +89,37 @@
             this.button1.Text = "Setting";
             this.button1.UseVisualStyleBackColor = true;
             // 
-            // buttonProcess
+            // btnProcess
             // 
-            this.buttonProcess.Enabled = false;
-            this.buttonProcess.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonProcess.Location = new System.Drawing.Point(609, 13);
-            this.buttonProcess.Name = "buttonProcess";
-            this.buttonProcess.Size = new System.Drawing.Size(89, 37);
-            this.buttonProcess.TabIndex = 5;
-            this.buttonProcess.Text = "Process";
-            this.buttonProcess.UseVisualStyleBackColor = true;
-            this.buttonProcess.Click += new System.EventHandler(this.buttonProcess_Click);
+            this.btnProcess.Enabled = false;
+            this.btnProcess.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProcess.Location = new System.Drawing.Point(609, 13);
+            this.btnProcess.Name = "btnProcess";
+            this.btnProcess.Size = new System.Drawing.Size(89, 37);
+            this.btnProcess.TabIndex = 5;
+            this.btnProcess.Text = "Process";
+            this.btnProcess.UseVisualStyleBackColor = true;
+            this.btnProcess.Click += new System.EventHandler(this.buttonProcess_Click);
+            // 
+            // btnSave
+            // 
+            this.btnSave.Enabled = false;
+            this.btnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSave.Location = new System.Drawing.Point(704, 13);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(89, 37);
+            this.btnSave.TabIndex = 6;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(984, 461);
-            this.Controls.Add(this.buttonProcess);
+            this.Controls.Add(this.btnSave);
+            this.Controls.Add(this.btnProcess);
             this.Controls.Add(this.buttonChooseFile);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.textBoxFileName);
@@ -125,7 +139,8 @@
         private System.Windows.Forms.TextBox textBoxFileName;
         private System.Windows.Forms.Button buttonChooseFile;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button buttonProcess;
+        private System.Windows.Forms.Button btnProcess;
+        private System.Windows.Forms.Button btnSave;
     }
 }
 

@@ -35,7 +35,7 @@ namespace IE182
                 {
                     textBoxFileName.Text = openFileDialog.FileName;
                     loadWorkSheet(openFileDialog.FileName);
-                    buttonProcess.Enabled = true;
+                    btnProcess.Enabled = true;
                 }
             }
         }
@@ -130,6 +130,8 @@ namespace IE182
 
             }
 
+            gridMain.Reset();
+
             GC.Collect();
         }
 
@@ -170,51 +172,71 @@ namespace IE182
         private void buttonProcess_Click(object sender, EventArgs e)
         {
             storeToDB();
-            ProcessDB();
+            if (ProcessDB())
+                btnSave.Enabled = true;
         }
 
-        private void ProcessDB()
+        private bool ProcessDB()
         {
+            var res = false;
+
             //Check file Database
             if (!File.Exists("IE182.db"))
-                return;
+                return res;
 
             //Open Database
             using (var db = new LiteDatabase("IE182.db"))
             {
-                var workshit = gridMain.CreateWorksheet("Final");
-                //Get Collections
-                var collect = db.GetCollection<Item>("items");
-                var items = collect.FindAll();
-                var grp_material = (from a in items
-                                 select new MaterialClass
-                                 {
-                                     MatlNo = a.AF,
-                                     MatlNa = a.AG,
-                                     Unit = a.AH,
-                                     SupplierCod = a.AL,
-                                     SupplierNa = a.AM,
-                                     MatlLT = a.AO,
-                                     TransDat = a.AP,
-                                 }).Distinct().ToList();
+                try
+                {
+                    var workshit = gridMain.CreateWorksheet("Final");
+                    //Get Collections
+                    var collect = db.GetCollection<Item>("items");
+                    var items = collect.FindAll();
+                    var grp_material = (from a in items
+                                        group a by new
+                                        {
+                                            a.AF,
+                                            a.AH,
+                                            a.AL,
+                                            a.AO,
+                                            a.AP,
+                                        } into b
+                                        select new MaterialClass()
+                                        {
+                                            MatlNo = b.Key.AF,
+                                            MatlNa = b.First().AG,
+                                            Unit = b.Key.AH,
+                                            SupplierCod = b.Key.AL,
+                                            SupplierNa = b.First().AM,
+                                            MatlLT = b.Key.AO,
+                                            TransDat = b.Key.AP,
+                                        }).ToList();
 
-                var grp_item = (from a in items
-                                group a by a.L into b
-                                select new POClass
-                                {
-                                    PO = b.Key,
-                                    POs = b.ToList()
-                                }).ToList();
+                    var grp_item = (from a in items
+                                    group a by a.L into b
+                                    select new POClass
+                                    {
+                                        PO = b.Key,
+                                        POs = b.ToList()
+                                    }).ToList();
+                    
+                    GenerateHeader(workshit, grp_material);
+                    GenerateOutput(workshit, grp_item, grp_material);
 
-                
-                
+                    gridMain.AddWorksheet(workshit);
+                    gridMain.CurrentWorksheet = workshit;
+                    gridMain.RemoveWorksheet(0);
 
-                GenerateHeader(workshit, grp_material);
-                GenerateOutput(workshit, grp_item, grp_material);
-                
-                gridMain.AddWorksheet(workshit);
-                gridMain.CurrentWorksheet = workshit;
+                    res = true;
+                } catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
+
+            GC.Collect();
+            return res;
         }
 
         private int GetColumnPosition(List<MaterialClass> list_matl, string MatNo, string SupplierCod, string Unit, string MatLT, string TransDat)
@@ -240,6 +262,12 @@ namespace IE182
             {
                 Flag = PlainStyleFlag.BackColor,
                 BackColor = Color.Aqua,
+            };
+
+            var align = new WorksheetRangeStyle()
+            {
+                Flag = PlainStyleFlag.HorizontalAlign,
+                HAlign = ReoGridHorAlign.Left,
             };
 
             var header_style = new WorksheetRangeStyle()
@@ -270,9 +298,13 @@ namespace IE182
             sheet[row_pos + 12, 19] = "顏色(Article)";
             sheet[row_pos + 12, 20] = "Order Qty";
             sheet[row_pos + 12, 21] = "累計訂單數量";
-
-            sheet.SetRangeStyles(row_pos + 12, 0, 1, 22, header_style);
+            
             sheet.SetRangeBorders(row_pos + 12, 0, 1, 22, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+
+            var col_count = list_matl.Count * 16 + 23;
+
+            if (col_count > 16384)
+                throw new Exception("This excel has reached the column limit, Please decrease the count of data! (This will have " + col_count + " Columns)");
 
             foreach (var item in list_matl)
             {
@@ -298,6 +330,18 @@ namespace IE182
                 sheet[row_pos + 6, col_pos + 1] = item.MatlLT;
                 sheet[row_pos + 7, col_pos + 1] = item.TransDat;
 
+                sheet.MergeRange(row_pos + 0, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 1, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 2, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 3, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 4, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 5, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 6, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 7, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 8, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 9, col_pos + 1, 1, 15);
+                sheet.MergeRange(row_pos + 10, col_pos + 1, 1, 15);
+
                 sheet[row_pos + 12, col_pos + 0] = "單位用量";
                 sheet[row_pos + 12, col_pos + 1] = "損耗率";
                 sheet[row_pos + 12, col_pos + 2] = "需求量";
@@ -315,11 +359,13 @@ namespace IE182
                 sheet[row_pos + 12, col_pos + 14] = "出庫日期";
                 sheet[row_pos + 12, col_pos + 15] = "期末庫存";
 
-                sheet.SetRangeBorders(row_pos, col_pos, 11, 1, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+                sheet.SetRangeBorders(row_pos, col_pos, 11, 16, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
                 sheet.SetRangeBorders(row_pos + 12, col_pos, 1, 16, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
-                sheet.SetRangeStyles(row_pos, col_pos, 11, 1, side_style);
-                sheet.SetRangeStyles(row_pos + 12, col_pos, 1, 16, header_style);
-
+                sheet.SetRangeStyles(row_pos, col_pos, 2, 1, side_style);
+                sheet.SetRangeStyles(row_pos + 3, col_pos, 2, 1, side_style);
+                sheet.SetRangeStyles(row_pos + 6, col_pos, 2, 1, side_style);
+                sheet.SetRangeStyles(row_pos, col_pos, 11, 15, align);
+                sheet.SetRangeStyles(row_pos + 8, col_pos + 1, 2, 15, header_style);
                 col_pos += 16;
             }
         }
@@ -331,6 +377,8 @@ namespace IE182
             foreach (var item in list_po)
             {
                 var po = item.POs.First();
+
+                AutoAppend(sheet, row_item, -1);
 
                 sheet[row_item, 0] = po.A;
                 sheet[row_item, 1] = "'" + po.B;
@@ -388,11 +436,26 @@ namespace IE182
 
         private void AutoAppend(Worksheet sheet, int row, int col)
         {
-            if (sheet.RowCount < row)
+            if (sheet.RowCount < row + 1)
                 sheet.AppendRows(row - sheet.RowCount + 1);
 
-            if (sheet.ColumnCount < col)
+            if (sheet.ColumnCount < col + 1)
                 sheet.AppendCols(col - sheet.ColumnCount + 1);
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            using (var saveDlg = new SaveFileDialog())
+            {
+                if (saveDlg.ShowDialog() == DialogResult.OK)
+                {
+                    gridMain.Save(saveDlg.FileName, unvell.ReoGrid.IO.FileFormat.Excel2007, Encoding.Unicode);
+                    gridMain.Reset();
+                    btnSave.Enabled = false;
+                    btnProcess.Enabled = false;
+                }
+                    
+            }
         }
     }
 
