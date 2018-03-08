@@ -122,7 +122,7 @@ namespace IE182
                 TmpItems.Add(item);
             }
 
-            TmpItems = TmpItems.OrderBy(x => x.A).ThenBy(x => x.L).ToList();
+            TmpItems = TmpItems.OrderBy(x => x.A).ThenBy(x => x.AF).ToList();
 
             Invoke(new ClearTable(ResetGrid));
 
@@ -206,10 +206,11 @@ namespace IE182
                                         }).ToList();
 
                     var grp_item = (from a in items
-                                    group a by a.L into b
+                                    group a by new { a.A, a.AF } into b
                                     select new POClass
                                     {
-                                        PO = b.Key,
+                                        Material = b.Key.AF,
+                                        Week = b.Key.A,
                                         POs = b.ToList()
                                     }).ToList();
 
@@ -371,8 +372,6 @@ namespace IE182
 
             foreach (var item in list_po)
             {
-                var po = item.POs.First();
-
                 AutoAppend(sheet, row_item + item.POs.Count - 1, -1);
 
                 foreach (var detPo in item.POs)
@@ -381,28 +380,28 @@ namespace IE182
 
                     if (col_x == -1) throw new Exception("Material Not Found!");
 
-                    sheet[row_item, 0] = po.A;
-                    sheet[row_item, 1] = "'" + po.B;
-                    sheet[row_item, 2] = po.C;
-                    sheet[row_item, 3] = "'" + po.D;
-                    sheet[row_item, 4] = po.E;
-                    sheet[row_item, 5] = po.F;
-                    sheet[row_item, 6] = po.G;
-                    sheet[row_item, 7] = po.H;
-                    sheet[row_item, 8] = po.I;
-                    sheet[row_item, 9] = po.J;
-                    sheet[row_item, 10] = po.K;
-                    sheet[row_item, 11] = "'" + po.L;
-                    sheet[row_item, 12] = po.M;
-                    sheet[row_item, 13] = "'" + po.N;
-                    sheet[row_item, 14] = po.O;
-                    sheet[row_item, 15] = "'" + po.P;
-                    sheet[row_item, 16] = "'" + po.Q;
-                    sheet[row_item, 17] = "'" + po.R;
-                    sheet[row_item, 18] = po.S;
-                    sheet[row_item, 19] = po.T;
-                    sheet[row_item, 20] = po.U;
-                    sheet[row_item, 21] = po.V;
+                    sheet[row_item, 0] = detPo.A;
+                    sheet[row_item, 1] = "'" + detPo.B;
+                    sheet[row_item, 2] = detPo.C;
+                    sheet[row_item, 3] = "'" + detPo.D;
+                    sheet[row_item, 4] = detPo.E;
+                    sheet[row_item, 5] = detPo.F;
+                    sheet[row_item, 6] = detPo.G;
+                    sheet[row_item, 7] = detPo.H;
+                    sheet[row_item, 8] = detPo.I;
+                    sheet[row_item, 9] = detPo.J;
+                    sheet[row_item, 10] = detPo.K;
+                    sheet[row_item, 11] = "'" + detPo.L;
+                    sheet[row_item, 12] = detPo.M;
+                    sheet[row_item, 13] = "'" + detPo.N;
+                    sheet[row_item, 14] = detPo.O;
+                    sheet[row_item, 15] = "'" + detPo.P;
+                    sheet[row_item, 16] = "'" + detPo.Q;
+                    sheet[row_item, 17] = "'" + detPo.R;
+                    sheet[row_item, 18] = detPo.S;
+                    sheet[row_item, 19] = detPo.T;
+                    sheet[row_item, 20] = detPo.U;
+                    sheet[row_item, 21] = detPo.V;
                     sheet[row_item, 22] = detPo.AF;
                     sheet[row_item, col_x + 0] = detPo.AI;
                     sheet[row_item, col_x + 1] = detPo.AJ;
@@ -505,8 +504,8 @@ namespace IE182
 
     public class POClass
     {
-        public string PO { get; set; }
-
+        public string Week { get; set; }
+        public string Material { get; set; }
         public List<Item> POs { get; set; }
     }
 }
