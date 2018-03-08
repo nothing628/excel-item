@@ -198,7 +198,7 @@ namespace IE182
                                         POs = b.ToList()
                                     }).ToList();
 
-                    Invoke(new UpdateStatus(UpdateStat), $"Creating Header ({grp_material.Count})", 0);
+                    Invoke(new UpdateStatus(UpdateStat), $"Creating Header ({grp_material.Count})...", 0);
                     GenerateHeader(workshit, grp_material);
                     GenerateOutput(workshit, grp_item, grp_material);
 
@@ -228,14 +228,14 @@ namespace IE182
                             select a).FirstOrDefault();
 
             if (material != null)
-                return list_matl.IndexOf(material) * 16 + 22;
+                return list_matl.IndexOf(material) * 16 + 23;
             return -1;
         }
 
         private void GenerateHeader(Worksheet sheet, List<MaterialClass> list_matl)
         {
             var row_pos = 1;
-            var col_pos = 22; // Start at Column 'W'
+            var col_pos = 23; // Start at Column 'X'
             var side_style = new WorksheetRangeStyle()
             {
                 Flag = PlainStyleFlag.BackColor,
@@ -276,8 +276,9 @@ namespace IE182
             sheet[row_pos + 12, 19] = "顏色(Article)";
             sheet[row_pos + 12, 20] = "Order Qty";
             sheet[row_pos + 12, 21] = "累計訂單數量";
-            
-            sheet.SetRangeBorders(row_pos + 12, 0, 1, 22, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+            sheet[row_pos + 12, 22] = "料號";
+
+            sheet.SetRangeBorders(row_pos + 12, 0, 1, 23, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
 
             var col_count = list_matl.Count * 16 + 23;
 
@@ -387,6 +388,7 @@ namespace IE182
                     sheet[row_item, 19] = po.T;
                     sheet[row_item, 20] = po.U;
                     sheet[row_item, 21] = po.V;
+                    sheet[row_item, 22] = detPo.AF;
                     sheet[row_item, col_x + 0] = detPo.AI;
                     sheet[row_item, col_x + 1] = detPo.AJ;
                     sheet[row_item, col_x + 2] = detPo.AK;
@@ -416,7 +418,7 @@ namespace IE182
                 item_pos++;
             }
 
-            sheet.SetRangeBorders(14, 0, sheet.RowCount - 14, 22, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+            sheet.SetRangeBorders(14, 0, sheet.RowCount - 14, 23, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
         }
 
         private delegate void UpdateStatus(string status, float progress);
