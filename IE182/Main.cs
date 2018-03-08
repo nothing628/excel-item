@@ -33,10 +33,13 @@ namespace IE182
             {
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
+                    Invoke(new UpdateStatus(UpdateStat), "Importing data...Please wait", 0);
                     textBoxFileName.Text = openFileDialog.FileName;
-                    loadWorkSheet(openFileDialog.FileName);
                     btnProcess.Enabled = true;
                     btnSave.Enabled = false;
+
+                    loadWorkSheet(openFileDialog.FileName);
+                    Invoke(new UpdateStatus(UpdateStat), "Import data success!", 1);
                 }
             }
         }
@@ -153,13 +156,25 @@ namespace IE182
 
         private void buttonProcess_Click(object sender, EventArgs e)
         {
+            btnProcess.Enabled = false;
+            buttonChooseFile.Enabled = false;
+
             Invoke(new UpdateStatus(UpdateStat), "", 0);
 
             Task.Run(() =>
             {
                 storeToDB();
                 ProcessDB();
+                Invoke(new Finish(FinishDB));
+                Invoke(new UpdateStatus(UpdateStat), "PO Processed Complete", 1);
             });
+        }
+
+        private void FinishDB()
+        {
+            btnProcess.Enabled = true;
+            buttonChooseFile.Enabled = true;
+            btnSave.Enabled = true;
         }
 
         private void ProcessDB()
@@ -424,6 +439,7 @@ namespace IE182
         private delegate void UpdateStatus(string status, float progress);
         private delegate void UpdateTables(IWorkbook workbook, bool IsSuccess);
         private delegate void ClearTable();
+        private delegate void Finish();
 
         private void UpdateWorkbook(IWorkbook workbook, bool IsSuccess)
         {
@@ -436,8 +452,6 @@ namespace IE182
                 gridMain.AddWorksheet(wrkSht);
                 gridMain.CurrentWorksheet = wrkSht;
                 gridMain.RemoveWorksheet(0);
-
-                btnSave.Enabled = true;
             }
         }
 
@@ -464,14 +478,15 @@ namespace IE182
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            using (var saveDlg = new SaveFileDialog())
+            using (var saveDlg = new SaveFileDialog() { Filter = "Excel File|*.xlsx"})
             {
                 if (saveDlg.ShowDialog() == DialogResult.OK)
                 {
+                    Invoke(new UpdateStatus(UpdateStat), "Exporting data...Please wait", 0);
                     gridMain.Save(saveDlg.FileName, unvell.ReoGrid.IO.FileFormat.Excel2007, Encoding.Unicode);
-                    gridMain.Reset();
                     btnSave.Enabled = false;
                     btnProcess.Enabled = false;
+                    Invoke(new UpdateStatus(UpdateStat), "Export data success!", 1);
                 }
             }
         }
