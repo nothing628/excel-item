@@ -45,20 +45,23 @@ namespace IE182
         }
 
         private void storeToDB() {
+            var startRow = Properties.Settings.Default.RowStart;
             var currentSheet = gridMain.CurrentWorksheet;
             var maxRow = currentSheet.RowCount;
             var maxCol = currentSheet.ColumnCount;
+            var counter = 0;
             
             TmpItems.Clear();
 
-            for (int i = 5; i <= maxRow; i++)
+            for (int i = startRow; i <= maxRow; i++)
             {
                 var firstCell = currentSheet[$"L{i}"];
 
                 if (firstCell == null || firstCell.ToString().Length == 0) //This empty data, ignore it
                     break;
 
-                Invoke(new UpdateStatus(UpdateStat), $"Received Item : {i - 4}", 0);
+                counter++;
+                Invoke(new UpdateStatus(UpdateStat), $"Received Item : {counter}", 0);
 
                 var item = new Item
                 {
@@ -143,7 +146,8 @@ namespace IE182
                     gridMain.RemoveWorksheet(willRemoveIndex);
                     willRemoveIndex--;
                 }
-                
+
+                gridMain.Worksheets[0].DeleteColumns(40, 1);
                 gridMain.CurrentWorksheet.SetRowsHeight(3, 1, 20);
             } catch (Exception ex)
             {
@@ -486,6 +490,17 @@ namespace IE182
                     btnSave.Enabled = false;
                     btnProcess.Enabled = false;
                     Invoke(new UpdateStatus(UpdateStat), "Export data success!", 1);
+                }
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            using (var sett = new Setting())
+            {
+                if (sett.ShowDialog() == DialogResult.OK)
+                {
+                    //
                 }
             }
         }
