@@ -125,7 +125,7 @@ namespace IE182
                 TmpItems.Add(item);
             }
 
-            TmpItems = TmpItems.OrderBy(x => x.A).ThenBy(x => x.AF).ToList();
+            TmpItems = TmpItems.OrderBy(x => Convert.ToInt32(x.A)).ThenBy(x => x.AF).ToList();
 
             Invoke(new ClearTable(ResetGrid));
 
@@ -195,18 +195,13 @@ namespace IE182
                                             a.AF,
                                             a.AH,
                                             a.AL,
-                                            a.AO,
-                                            a.AP,
                                         } into b
                                         select new MaterialClass()
                                         {
                                             MatlNo = b.Key.AF,
-                                            MatlNa = b.First().AG,
                                             Unit = b.Key.AH,
                                             SupplierCod = b.Key.AL,
-                                            SupplierNa = b.First().AM,
-                                            MatlLT = b.Key.AO,
-                                            TransDat = b.Key.AP,
+                                            ListItems = b.ToList(),
                                         }).ToList();
 
                     var grp_item = (from a in items
@@ -237,14 +232,12 @@ namespace IE182
             GC.Collect();
         }
 
-        private int GetColumnPosition(List<MaterialClass> list_matl, string MatNo, string SupplierCod, string Unit, string MatLT, string TransDat)
+        private int GetColumnPosition(List<MaterialClass> list_matl, string MatNo, string SupplierCod, string Unit)
         {
             var material = (from a in list_matl
                             where a.MatlNo == MatNo
                             where a.SupplierCod == SupplierCod
                             where a.Unit == Unit
-                            where a.MatlLT == MatLT
-                            where a.TransDat == TransDat
                             select a).FirstOrDefault();
 
             if (material != null)
@@ -380,7 +373,7 @@ namespace IE182
 
                 foreach (var detPo in item.POs)
                 {
-                    var col_x = GetColumnPosition(list_matl, detPo.AF, detPo.AL, detPo.AH, detPo.AO, detPo.AP);// GetColumn position by material and supplier;
+                    var col_x = GetColumnPosition(list_matl, detPo.AF, detPo.AL, detPo.AH);// GetColumn position by material and supplier;
 
                     if (col_x == -1) throw new Exception("Material Not Found!");
 
@@ -436,7 +429,7 @@ namespace IE182
                 item_pos++;
             }
 
-            sheet.SetRangeBorders(14, 0, sheet.RowCount - 14, 23, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
+            sheet.SetRangeBorders(14, 0, row_item - 14, 23, BorderPositions.All, new RangeBorderStyle(Color.Black, BorderLineStyle.Solid));
         }
 
         private delegate void UpdateStatus(string status, float progress);
@@ -509,12 +502,71 @@ namespace IE182
     public class MaterialClass
     {
         public string MatlNo { get; set; }
-        public string MatlNa { get; set; }
+        public string MatlNa
+        {
+            get
+            {
+                return ListItems.First().AG;
+            }
+        }
         public string Unit { get; set; }
         public string SupplierCod { get; set; }
-        public string SupplierNa { get; set; }
-        public string MatlLT { get; set; }
-        public string TransDat { get; set; }
+        public string SupplierNa
+        {
+            get {
+                return ListItems.First().AM;
+            }
+        }
+        public string MatlLT
+        {
+            get
+            {
+                var lst = new List<int>();
+                var matLt = (from a in ListItems
+                             select a.AO).Distinct().ToList();
+                var str = "";
+
+                matLt.ForEach(x => {
+                    try
+                    {
+                        var s = Convert.ToInt32(x);
+
+                        if (s > 0)
+                            lst.Add(s);
+                    } catch { }
+                });
+
+                lst.ForEach(x => str += x.ToString() + ", ");
+
+                return str.Substring(0, str.Length - 2);
+            }
+        }
+        public string TransDat
+        {
+            get
+            {
+                var lst = new List<int>();
+                var matLt = (from a in ListItems
+                             select a.AP).Distinct().ToList();
+                var str = "";
+
+                matLt.ForEach(x => {
+                    try
+                    {
+                        var s = Convert.ToInt32(x);
+
+                        if (s > 0)
+                            lst.Add(s);
+                    }
+                    catch { }
+                });
+
+                lst.ForEach(x => str += x.ToString() + ", ");
+
+                return str.Substring(0, str.Length - 2);
+            }
+        }
+        public List<Item> ListItems { get; set; }
     }
 
     public class POClass
