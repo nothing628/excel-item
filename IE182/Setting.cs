@@ -34,7 +34,10 @@ namespace IE182
             Properties.Settings.Default.RowStart = Convert.ToInt32(numericUpDown1.Value);
             Properties.Settings.Default.IgnoreColumn.Clear();
 
-            // TODO: Add to ignore column
+            foreach (string item in listBox1.Items)
+            {
+                Properties.Settings.Default.IgnoreColumn.Add(item);
+            }
 
             Properties.Settings.Default.Save();
         }
@@ -59,7 +62,10 @@ namespace IE182
 
         private void button4_Click(object sender, EventArgs e)
         {
-            //Remove from list
+            if (listBox1.SelectedIndex > -1)
+            {
+                //Remove from list
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)
